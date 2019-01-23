@@ -18,6 +18,10 @@ app.post('/getText',db.updateUserMessage);
 
 app.post('/chatText',db.addItem);
 
+app.post('/register',db.register);
+
+app.post('/login',db.login);
+
 app.listen(5000);
 
 

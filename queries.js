@@ -30,7 +30,8 @@ const updateUserMessage = (req,res) => {
 	                            text:each.message,
 	                            address:'remote',
 	                            ipAddress:each.ipaddress,
-	                            datetime:each.datetime
+	                            datetime:each.datetime,
+                                    nickname:each.nickname
 	            }
 	    })
 
@@ -41,6 +42,7 @@ const updateUserMessage = (req,res) => {
 
 const addItem = (req,res) => {
     let text = req.body.chatText.text;
+    let nickname = req.body.chatText.nickname;
     let datetime = req.body.chatText.datetime;
 
     columnNames = ['message','ipaddress','datetime'];
@@ -67,7 +69,8 @@ const addItem = (req,res) => {
             text:insertValues[0],
             address:'local',
             ipAddress: insertValues[1],
-            datetime:insertValues[2]
+            datetime:insertValues[2],
+	    nickname:nickname
     }
 
     res.status(200).json(sendText);
@@ -77,12 +80,50 @@ const addItem = (req,res) => {
 
 }
 
+const register = (req,res) => {
+	const username = req.body.userinfo.username;
+	const password = req.body.userinfo.password;
+	const nickname = req.body.userinfo.nickname;
+	
+	const insertQuery = `INSERT INTO userinfo(username,password,nickname) VALUES($1,$2,$3) RETURNING nickname`;
+	const insertValues = [username,password,nickname];
+	pool.query(insertQuery,insertValues,(err,results) => {
+		if(err){
+			throw err;	
+		}
+		let resObject = {
+			nickname:results.rows[0].nickname
+		}
+		res.status(200).json(resObject);
+	})
+}
 
-
+const login = (req,res) => {
+	const usernameLogin = req.body.userLogin.username;
+	const passwordLogin = req.body.userLogin.password;
+	
+	const loginQuery = `select * from userinfo where username='${usernameLogin}'`;
+	pool.query(loginQuery,(err,results) => {
+		if(results.rows[0]===undefined){
+			res.status(200).json({loginStatus:'wrongUsername'});
+		}else if(results.rows[0].password !==  passwordLogin){
+			res.status(200).json({loginStatus:'wrongPassword'});
+		}else{
+			res.status(200).json({
+	                        loginStatus:'success',
+	                        nickname:results.rows[0].nickname
+	                });
+		}	
+	})
+	
+	res.status(200);
+}
 
 module.exports = {
 	updateUserMessage,
 	addItem,
+	register,
+	login
 }
 
 
