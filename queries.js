@@ -45,8 +45,8 @@ const addItem = (req,res) => {
     let nickname = req.body.chatText.nickname;
     let datetime = req.body.chatText.datetime;
 
-    columnNames = ['message','ipaddress','datetime'];
-    insertValues = [text,req.clientIp.substring(7, ),datetime];
+    columnNames = ['message','ipaddress','datetime','nickname'];
+    insertValues = [text,req.clientIp.substring(7, ),datetime,nickname];
 	
 
 	let dollarSymbol = '';
