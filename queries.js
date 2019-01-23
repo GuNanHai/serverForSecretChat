@@ -85,16 +85,26 @@ const register = (req,res) => {
 	const password = req.body.userinfo.password;
 	const nickname = req.body.userinfo.nickname;
 	
-	const insertQuery = `INSERT INTO userinfo(username,password,nickname) VALUES($1,$2,$3) RETURNING nickname`;
-	const insertValues = [username,password,nickname];
-	pool.query(insertQuery,insertValues,(err,results) => {
+	const insertQuery = `insert into userinfo(username,password,nickname) select '${username}','${password}','${nickname}' where not exists (select * from userinfo where username='${username}') returning nickname`;
+	
+	pool.query(insertQuery,(err,results) => {
 		if(err){
 			throw err;	
 		}
-		let resObject = {
-			nickname:results.rows[0].nickname
-		}
-		res.status(200).json(resObject);
+		
+
+		if(!results.rows[0]){
+			let resObject = {
+                        nickname:'userExists'
+                	}
+
+			res.status(200).json(resObject);
+		}else{
+			let resObject = {
+                        nickname:results.rows[0].nickname
+                	}
+                	res.status(200).json(resObject);
+		}		
 	})
 }
 
